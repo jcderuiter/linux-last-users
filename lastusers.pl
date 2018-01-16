@@ -1,14 +1,22 @@
 #!/usr/bin/perl
 use strict;
 
-my @passwd  = `cat /etc/passwd`;
-my %name    = map { split(/:/); $_[0] => $_[4] } @passwd;
-my %homedir = map { split(/:/); $_[0] => $_[5] } @passwd;
+my %group = map { reverse(/(.+?):.*?:(\d+)/) } `cat /etc/group`;
+my %gecos;
+my %gid;
+my %directory;
+for (`cat /etc/passwd`)
+{
+   next unless (/(.+?):.*?:.*?:(\d+):(.*?):(.*?):/);
+   $gecos{$1}     = $3;
+   $gid{$1}       = $2;
+   $directory{$1} = $4;
+}
 
-foreach (reverse(`last`))
+foreach (reverse(`last -i`))
 {
    my ($last, $uid) = (/((\S+).*)$/);
-   my $homedir      = $homedir{$uid} || '';
-   my $name         = $name{$uid}    || sprintf $uid if ($homedir);
-   printf "$last\t%-40s\t$homedir\n", $name;
+   print "$last";
+   printf("\t%-40s\t%-8s\t%s", $gecos{$uid}, $group{$gid{$uid}}, $directory{$ui»
+   print "\n";
 }
